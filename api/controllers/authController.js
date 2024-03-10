@@ -103,13 +103,13 @@ export const signinController = async (req, res, next) => {
         id: user._id,
       },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: "60s" }
+      { expiresIn: "1d" }
     )
 
     res.cookie("auth_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 60*1000 //86400000,
+      maxAge: 86400000,
     })
     const { password: passwordExtracted, ...userWithoutPassword } = user._doc
     res
@@ -256,10 +256,9 @@ export const resetPasswordController = async (req, res, next) => {
   }
 }
 
-export const checkAuthController= async(req, res, next)=>{
-  console.log("it rann")
+export const checkAuthController = async (req, res, next) => {
   const token = req.cookies.auth_token
-  if (!token) {    
+  if (!token) {
     return next(errorHandler(401, "You are logged out, sign in again"))
   }
   jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
