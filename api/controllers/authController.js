@@ -9,7 +9,7 @@ import { welcomeEmail } from "../emails/welcomeEmail.js"
 import { sendMail } from "../emails/sendMail.js"
 
 export const signupController = async (req, res, next) => {
-  const { name, email, password } = req.body
+  let { name, email, password } = req.body
 
   if (
     !name ||
@@ -21,6 +21,8 @@ export const signupController = async (req, res, next) => {
   ) {
     return next(errorHandler(400, "All fields are required"))
   }
+  email = email.toString(email).trim().toLowerCase()
+  password = password.toString().trim()
 
   if (email.includes(" ") || password.includes(" ")) {
     return next(
@@ -50,7 +52,11 @@ export const signupController = async (req, res, next) => {
     //saving the new user
     newUser._id = new mongoose.Types.ObjectId()
     const response = await newUser.save()
-    await sendMail(newUser.email, `Namaste, a warm welcome to ${process.env.SITE_TITLE}`, welcomeEmail(newUser.email))
+    await sendMail(
+      newUser.email,
+      `Namaste, a warm welcome to ${process.env.SITE_TITLE}`,
+      welcomeEmail(newUser.email)
+    )
     res.status(201).jsonResponse(true, 201, "Sign up successfull", response)
   } catch (error) {
     next(error)
@@ -64,8 +70,8 @@ export const signinController = async (req, res, next) => {
     return next(errorHandler(400, "All fields are required"))
   }
 
-  email = email.trim()
-  password = password.trim()
+  email = email.toString().trim().toLowerCase()
+  password = password.toString().trim()
 
   if (email === "" || password === "") {
     return next(errorHandler(400, "All fields are required"))
@@ -97,13 +103,13 @@ export const signinController = async (req, res, next) => {
         id: user._id,
       },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: "1d" }
+      { expiresIn: "60s" }
     )
 
     res.cookie("auth_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 86400000,
+      maxAge: 60*1000 //86400000,
     })
     const { password: passwordExtracted, ...userWithoutPassword } = user._doc
     res
@@ -182,7 +188,11 @@ export const forgotPasswordController = async (req, res, next) => {
   </body>`
 
     try {
-      await sendMail(user.email, `Reset password link | ${process.env.SITE_TITLE}`, htmlBody)
+      await sendMail(
+        user.email,
+        `Reset password link | ${process.env.SITE_TITLE}`,
+        htmlBody
+      )
       lastForgotPasswordRequestTime = new Date().getTime()
       res
         .status(200)
@@ -244,4 +254,18 @@ export const resetPasswordController = async (req, res, next) => {
   } catch (error) {
     next(error)
   }
+}
+
+export const checkAuthController= async(req, res, next)=>{
+  console.log("it rann")
+  const token = req.cookies.auth_token
+  if (!token) {    
+    return next(errorHandler(401, "You are logged out, sign in again"))
+  }
+  jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
+    if (err) {
+      return next(errorHandler(401, "You are logged out, sign in again"))
+    }
+  })
+  res.status(200).jsonResponse(true, 200, "Authorized")
 }

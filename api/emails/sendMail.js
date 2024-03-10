@@ -15,8 +15,8 @@ const transporter = nodemailer.createTransport({
 export const sendMail = async (toAddress, subject, htmlBody) => {
   const mailOptions = {
     from: {
-      name: "Quick Quip",
-      address: "olifarhaan@gmail.com",
+      name: process.env.SITE_TITLE,
+      address: process.env.MAILER_EMAIL,
     }, // sender address
     to: toAddress, // list of receivers
     subject: subject, // Subject line

@@ -9,18 +9,33 @@ import connect from "./db/connect.js"
 import { PORT } from "./utils/constants.js"
 import cookieParser from "cookie-parser"
 import path from "path"
-import { errorHandler } from "./utils/errors.js"
+import rateLimit from "express-rate-limit"
+import helmet from "helmet"
+import mongoSanitize from "express-mongo-sanitize"
+import xss from "xss-clean"
 
 const __dirname = path.resolve()
 const app = express()
+const globalLimiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000, // 1 hour duration
+  message: {
+    statusCode: 429,
+    success: false,
+    message: "Too many requests, please try again later",
+  },
+})
 
-//Middleware for parsing request & response------>
-app.use(express.json())
+// Middlewares ------>
+app.use("/api", globalLimiter)
+app.use(helmet())
+app.use(mongoSanitize()) // sanitization againt NOSQL query injection
+app.use(xss()) // sanitize agains XSS attacks (like HTML in input)
+app.use(express.json({limit: "5mb"}))
 app.use(cookieParser())
 app.use(responseMiddleware)
 
-
-//Routes ------------------------------------>
+// Routes middleware ------------------------------------>
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/user", userRouter)
 app.use("/api/v1/posts", postRouter)
@@ -30,7 +45,7 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "client", "dist", "index.html"))
 })
 
-//Error hnadling middlewares------------------->
+// Error hnadling middlewares------------------->
 app.use(errorHandlerMiddleware)
 
 // Server start code----------------------->

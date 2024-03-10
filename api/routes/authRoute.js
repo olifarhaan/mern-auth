@@ -6,10 +6,12 @@ import {
   forgotPasswordController,
   resetPasswordValidatorController,
   resetPasswordController,
+  checkAuthController,
 } from "../controllers/authController.js"
 
 const router = express.Router()
 
+router.get("/check-auth", checkAuthController)
 router.post("/signup", signupController)
 router.post("/signin", signinController)
 router.post("/signout", signoutController)

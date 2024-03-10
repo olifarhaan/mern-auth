@@ -44,6 +44,7 @@ export default function SignUp() {
         body: JSON.stringify(formData),
       })
       const responseJSON = await res.json()
+      console.log(responseJSON, "responseJson----->")
       if (res.ok && responseJSON.success) {
         dispatch(signInSuccess(responseJSON.data))
         navigate("/")
