@@ -21,7 +21,7 @@ const Header = () => {
               to="/"
             >
               <SiAuthelia className="text-accentRed" />
-              <span className="font-bold text-darkBlack">Mern Auth</span>
+              <span className="font-bold text-black">Mern Auth</span>
             </Link>
           </div>
 

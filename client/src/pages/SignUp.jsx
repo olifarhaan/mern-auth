@@ -6,11 +6,13 @@ import { FaEyeSlash, FaEye } from "react-icons/fa"
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false)
+  const [agreeTerms, setAgreeTerms] = useState(false)
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
   })
 
   const [loading, setLoading] = useState(false)
@@ -27,10 +29,16 @@ export default function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
+    if (!agreeTerms) {
+      toast.error("Please agree to the terms and conditions")
+      setLoading(false)
+      return
+    }
     if (
       formData.name === "" ||
       formData.email === "" ||
-      formData.password === ""
+      formData.password === "" ||
+      formData.confirmPassword === ""
     ) {
       toast.error("All fields are required")
       setLoading(false)
@@ -49,11 +57,19 @@ export default function SignUp() {
       return
     }
 
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match")
+      setLoading(false)
+      return
+    }
+
     try {
+      const { confirmPassword, ...userWithoutConfirmPassword } = formData
+      console.log(userWithoutConfirmPassword)
       const res = await fetch("/api/v1/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(userWithoutConfirmPassword),
       })
       const responseJSON = await res.json()
       if (res.ok && responseJSON.success) {
@@ -83,6 +99,7 @@ export default function SignUp() {
             autoComplete="name"
             onChange={handleChange}
             value={formData.name}
+            required
           />
           <input
             type="text"
@@ -91,6 +108,7 @@ export default function SignUp() {
             autoComplete="email"
             onChange={handleChange}
             value={formData.email}
+            required
           />
           <div className="relative">
             <input
@@ -113,6 +131,30 @@ export default function SignUp() {
                 className="absolute right-3 top-3 text-2xl text-gray-700 cursor-pointer transition ease-in-out"
               />
             )}
+          </div>
+          <input
+            type="password"
+            id="confirmPassword"
+            placeholder="Confirm Password"
+            onChange={handleChange}
+            value={formData.confirmPassword}
+            required
+          />
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="agreeTerms"
+              checked={agreeTerms}
+              onChange={() => setAgreeTerms(!agreeTerms)}
+              className="outline-none mr-2"
+              style={{ outline: "none" }}
+            />
+            <label
+              htmlFor="agreeTerms"
+              className="text-gray-700 text-sm"
+            >
+              I agree with the terms and conditions of Mern Auth
+            </label>
           </div>
           <button
             className={`bg-accentRed border rounded-sm border-black text-white h-12 hover:bg-accentDarkRed transition duration-500 ease-in-out ${

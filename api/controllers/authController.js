@@ -5,7 +5,8 @@ import jwt from "jsonwebtoken"
 import dotenv from "dotenv/config"
 import { isValidEmail } from "../utils/validEmail.js"
 import mongoose from "mongoose"
-import { sendMail } from "../utils/sendMail.js"
+import { welcomeEmail } from "../emails/welcomeEmail.js"
+import { sendMail } from "../emails/sendMail.js"
 
 export const signupController = async (req, res, next) => {
   const { name, email, password } = req.body
@@ -49,6 +50,7 @@ export const signupController = async (req, res, next) => {
     //saving the new user
     newUser._id = new mongoose.Types.ObjectId()
     const response = await newUser.save()
+    await sendMail(newUser.email, `Namaste, a warm welcome to ${process.env.SITE_TITLE}`, welcomeEmail(newUser.email))
     res.status(201).jsonResponse(true, 201, "Sign up successfull", response)
   } catch (error) {
     next(error)
@@ -176,11 +178,11 @@ export const forgotPasswordController = async (req, res, next) => {
     If you have not requested the link then please ignore this email. 
     <br>
     Cheers,<br>
-    Quick Quip Team
+    ${process.env.SITE_TITLE} Team
   </body>`
 
     try {
-      await sendMail(user.email, "Reset password link | Quick Quip", htmlBody)
+      await sendMail(user.email, `Reset password link | ${process.env.SITE_TITLE}`, htmlBody)
       lastForgotPasswordRequestTime = new Date().getTime()
       res
         .status(200)

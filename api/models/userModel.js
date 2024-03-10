@@ -1,4 +1,5 @@
 import mongoose from "mongoose"
+import Post from "./postModel.js"
 // import Url from "./urlModel.js"
 
 const userSchema = new mongoose.Schema(
@@ -28,14 +29,8 @@ userSchema.pre(
   { document: true}, //to load the document otherwise it will give null
   async function (next) {
     try {
-      const urls = await Url.find({ user: this._id })
-
-      urls.map((url) => {
-        console.log(url)
-        console.log(url._doc)
-        console.log(url._doc._id)
-      })
-      await Url.deleteMany({ user: this._id })
+      const posts = await Post.find({ user: this._id })
+      await Post.deleteMany({ user: this._id })
       next()
     } catch (error) {
       next(error)

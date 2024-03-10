@@ -20,7 +20,6 @@ export const sendMail = async (toAddress, subject, htmlBody) => {
     }, // sender address
     to: toAddress, // list of receivers
     subject: subject, // Subject line
-    // text: textBody, // plain text body
     html: htmlBody, // html body
   }
   try {
