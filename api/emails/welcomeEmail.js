@@ -1,5 +1,5 @@
-export const welcomeEmail= (userName)=>{
-    const emailString  = `<!DOCTYPE html>
+export const welcomeEmail = (userName) => {
+  const emailString = `<!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8">
@@ -53,4 +53,5 @@ export const welcomeEmail= (userName)=>{
     </body>
     </html>
     `
-} 
+  return emailString
+}
